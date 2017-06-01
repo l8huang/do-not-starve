@@ -1,0 +1,39 @@
+// name: ui
+// MatrixPVW: (0, 20, 1) : (0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+// SAMPLER: (0, 43, 1) : []
+
+/* PosUVColour.vs */
+uniform mat4 MatrixPVW;
+
+attribute vec3 POSITION;
+attribute vec2 TEXCOORD0;
+attribute vec4 DIFFUSE;
+
+varying vec2 PS_TEXCOORD;
+varying vec4 PS_COLOUR;
+
+void main()
+{
+	gl_Position = MatrixPVW * vec4( POSITION.xyz, 1.0 );
+	PS_TEXCOORD.xy = TEXCOORD0.xy;
+	PS_COLOUR.rgba = vec4( DIFFUSE.rgb * DIFFUSE.a, DIFFUSE.a ); // premultiply the alpha
+}
+
+
+/* ui.ps */
+#if defined( GL_ES )
+precision mediump float;
+#endif
+
+uniform sampler2D SAMPLER[1];
+varying vec2 PS_TEXCOORD;
+varying vec4 PS_COLOUR;
+
+void main()
+{
+    vec4 colour = texture2D( SAMPLER[0], PS_TEXCOORD.xy );
+	colour.rgba *= PS_COLOUR.rgba;
+      
+	gl_FragColor = colour;
+}
+
